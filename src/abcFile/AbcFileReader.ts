@@ -572,7 +572,7 @@ export default class AbcFileReader {
           return classes[i];
         },
         get name() {
-          return constantPool.multinames[nameIndex];
+          return constantPool.multinames[nameIndex] as IQName;
         },
         get supername() {
           return constantPool.multinames[supernameIndex];
