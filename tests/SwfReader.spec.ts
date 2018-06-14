@@ -24,6 +24,8 @@ describe("SwfReader", () => {
 
   it("can getFile() over and over without errors", () => {
     file = reader.getFile();
+    file = reader.getFile();
+    file = reader.getFile();
   });
 });
 
