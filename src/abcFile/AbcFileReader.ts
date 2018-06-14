@@ -47,13 +47,14 @@ export default class AbcFileReader {
     const metadataInfos = this.readMetadataInfos(metadataCount, constantPool);
     const classCount = this.buffer.readEncodedU30();
     const classes: IClassInfo[] = [];
+    const methodBodies: IMethodBody[] = [];
     const instances = this.readInstances(
       classCount,
       constantPool,
       methods,
-      classes
+      classes,
+      methodBodies
     );
-    const methodBodies: IMethodBody[] = [];
     for (let i = 0; i < classCount; i++) {
       classes.push(
         this.readClass(i, constantPool, methods, classes, instances, methodBodies)
@@ -62,7 +63,7 @@ export default class AbcFileReader {
     const scriptCount = this.buffer.readEncodedU30();
     const scripts: IScriptInfo[] = [];
     for (let i = 0; i < scriptCount; i++) {
-      scripts.push(this.readScript(constantPool, methods, classes));
+      scripts.push(this.readScript(constantPool, methods, classes, methodBodies));
     }
     const methodBodyCount = this.buffer.readEncodedU30();
     for (let i = 0; i < methodBodyCount; i++) {
@@ -71,7 +72,8 @@ export default class AbcFileReader {
           methodBodyCount,
           methods,
           constantPool,
-          classes
+          classes,
+          methodBodies
         )
       );
     }
@@ -402,7 +404,8 @@ export default class AbcFileReader {
   private readTrait(
     constantPool: IConstantPool,
     methods: IMethodInfo[],
-    classes: IClassInfo[]
+    classes: IClassInfo[],
+    methodBodies: IMethodBody[]
   ): Trait {
     const nameIndex2 = this.buffer.readEncodedU30();
     const kindAndAttrs = this.buffer.readUInt8();
@@ -463,7 +466,10 @@ export default class AbcFileReader {
           slotId,
           get func() {
             return methods[methodIndex];
-          }
+          },
+          get funcBody() {
+            return methodBodies.find((mb) => mb.methodIndex === methodIndex);
+          },
         };
         break;
       }
@@ -480,7 +486,10 @@ export default class AbcFileReader {
           kind,
           get method() {
             return methods[methodIndex];
-          }
+          },
+          get methodBody() {
+            return methodBodies.find((mb) => mb.methodIndex === methodIndex);
+          },
         };
         break;
     }
@@ -507,7 +516,7 @@ export default class AbcFileReader {
     const traitCount = this.buffer.readEncodedU30();
     const traits: Trait[] = [];
     for (let i = 0; i < traitCount; i++) {
-      traits.push(this.readTrait(constantPool, methods, classes));
+      traits.push(this.readTrait(constantPool, methods, classes, methodBodies));
     }
     return {
       get instance() {
@@ -527,13 +536,14 @@ export default class AbcFileReader {
   private readScript(
     constantPool: IConstantPool,
     methods: IMethodInfo[],
-    classes: IClassInfo[]
+    classes: IClassInfo[],
+    methodBodies: IMethodBody[]
   ): IScriptInfo {
     const initIndex = this.buffer.readEncodedU30();
     const traitCount = this.buffer.readEncodedU30();
     const traits: Trait[] = [];
     for (let i = 0; i < traitCount; i++) {
-      traits.push(this.readTrait(constantPool, methods, classes));
+      traits.push(this.readTrait(constantPool, methods, classes, methodBodies));
     }
     return {
       get init() {
@@ -548,7 +558,8 @@ export default class AbcFileReader {
     classCount: number,
     constantPool: IConstantPool,
     methods: IMethodInfo[],
-    classes: IClassInfo[]
+    classes: IClassInfo[],
+    methodBodies: IMethodBody[]
   ): IInstanceInfo[] {
     const instances: IInstanceInfo[] = [];
     for (let i = 0; i < classCount; i++) {
@@ -573,7 +584,7 @@ export default class AbcFileReader {
       const traitCount = this.buffer.readEncodedU30();
       const traits: Trait[] = [];
       for (let x = 0; x < traitCount; x++) {
-        traits.push(this.readTrait(constantPool, methods, classes));
+        traits.push(this.readTrait(constantPool, methods, classes, methodBodies));
       }
 
       instances.push({
@@ -630,7 +641,8 @@ export default class AbcFileReader {
     methodBodyCount: number,
     methods: IMethodInfo[],
     constantPool: IConstantPool,
-    classes: IClassInfo[]
+    classes: IClassInfo[],
+    methodBodies: IMethodBody[],
   ): IMethodBody {
     const methodIndex = this.buffer.readEncodedU30();
     const maxStack = this.buffer.readEncodedU30();
@@ -655,7 +667,7 @@ export default class AbcFileReader {
     const traitCount = this.buffer.readEncodedU30();
     const traits: Trait[] = [];
     for (let y = 0; y < traitCount; y++) {
-      traits.push(this.readTrait(constantPool, methods, classes));
+      traits.push(this.readTrait(constantPool, methods, classes, methodBodies));
     }
 
     return {
