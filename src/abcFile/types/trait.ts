@@ -1,7 +1,7 @@
 import { IClassInfo } from "./classes";
 import { Constant } from "./constant";
 import { IMethodInfo } from "./methods";
-import { MultinameInfo } from "./multiname";
+import { IQName, MultinameInfo } from "./multiname";
 
 export enum TraitKind {
   Slot = 0,
@@ -20,7 +20,7 @@ export enum TraitAttribute {
 }
 
 export interface ITrait {
-  name: MultinameInfo;
+  name: IQName;
   kind: TraitKind;
   metadataCount?: number;
   metadata?: { key: string; value: string };

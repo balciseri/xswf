@@ -419,7 +419,7 @@ export default class AbcFileReader {
         }
         trait = {
           get name() {
-            return constantPool.multinames[nameIndex2];
+            return constantPool.multinames[nameIndex2] as IQName;
           },
           kind,
           slotId,
@@ -438,7 +438,7 @@ export default class AbcFileReader {
         const classi = this.buffer.readEncodedU30();
         trait = {
           get name() {
-            return constantPool.multinames[nameIndex2];
+            return constantPool.multinames[nameIndex2] as IQName;
           },
           kind,
           get class() {
@@ -452,7 +452,7 @@ export default class AbcFileReader {
         const functionIndex = this.buffer.readEncodedU30();
         trait = {
           get name() {
-            return constantPool.multinames[nameIndex2];
+            return constantPool.multinames[nameIndex2] as IQName;
           },
           kind,
           slotId,
@@ -470,7 +470,7 @@ export default class AbcFileReader {
         trait = {
           dispId,
           get name() {
-            return constantPool.multinames[nameIndex2];
+            return constantPool.multinames[nameIndex2] as IQName;
           },
           kind,
           get method() {
