@@ -16,6 +16,7 @@ import {
   IQName,
   IRTQName,
   IRTQNameL,
+  ITypeName,
   MultinameInfo,
   MultinameKind
 } from "./types/multiname";
@@ -25,7 +26,7 @@ import {
   NamespaceKind
 } from "./types/namespace";
 import { IScriptInfo } from "./types/scripts";
-import { ITrait, Trait, TraitKind } from "./types/trait";
+import { ITrait, Trait, TraitAttribute, TraitKind } from "./types/trait";
 /**
  * Spec: https://wwwimages2.adobe.com/content/dam/acom/en/devnet/pdf/avm2overview.pdf
  * Page 18 onwards
@@ -210,12 +211,22 @@ export default class AbcFileReader {
           multinames.push(multinamel);
           break;
         case MultinameKind.TypeName:
-          const nameIndex1 = this.buffer.readEncodedU30();
+          const name4 = this.buffer.readEncodedU30();
           const paramsCount = this.buffer.readEncodedU30();
+          const params: number[] = [];
           for (let j = 0; j < paramsCount; j++) {
-            this.buffer.readEncodedU30();
+            params.push(this.buffer.readEncodedU30());
           }
-          multinames.push(null);
+          const typeName: ITypeName = {
+            kind,
+            get name() {
+              return multinames[name4];
+            },
+            get names() {
+              return params.map(p => multinames[p]);
+            },
+          }
+          multinames.push(typeName);
           break;
         default:
           multinames.push(null);
@@ -478,11 +489,18 @@ export default class AbcFileReader {
       case TraitKind.Setter:
         const dispId = this.buffer.readEncodedU30();
         const methodIndex = this.buffer.readEncodedU30();
+        let attribute: TraitAttribute;
+        if (attrs & 0x1) {
+          attribute = TraitAttribute.Final;
+        } else if (attrs & 0x2) {
+          attribute = TraitAttribute.Override
+        }
         trait = {
           dispId,
           get name() {
             return constantPool.multinames[nameIndex2] as IQName;
           },
+          attribute,
           kind,
           get method() {
             return methods[methodIndex];

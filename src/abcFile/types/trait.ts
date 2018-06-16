@@ -47,6 +47,7 @@ export interface ITraitFunction extends ITrait {
 
 export interface ITraitMethod extends ITrait {
   kind: TraitKind.Method | TraitKind.Getter | TraitKind.Setter;
+  attribute: TraitAttribute;
   dispId: number;
   method: IMethodInfo;
   methodBody: IMethodBody;
